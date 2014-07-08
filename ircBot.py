@@ -38,6 +38,15 @@ class IrcBot(irc.IRCClient):
                         time.asctime(time.localtime(time.time())))
         self.logger.close()
 
+    # override these functions to handle different events
+    def handle_whisper(self, user, msg):
+        pass
+
+    def handle_message(self, user, msg):
+        pass
+
+    def handle_action(self, user, msg):
+        pass
 
     # callbacks for events
 
@@ -56,20 +65,21 @@ class IrcBot(irc.IRCClient):
 
         # Check to see if they're sending me a private message
         if channel == self.nickname:
-            msg = "It isn't nice to whisper!  Play nice with the group."
-            self.msg(user, msg)
-            return
+            #msg = "It isn't nice to whisper!  Play nice with the group."
+            #self.msg(user, msg)
+            self.handle_whisper(user, msg)
 
-        # Otherwise check to see if it is a message directed at me
-        if msg.startswith(self.nickname + ":"):
-            msg = "%s: I am a log bot" % user
-            self.msg(channel, msg)
-            self.logger.log("<%s> %s" % (self.nickname, msg))
+        # Otherwise it is a message
+        else:  # DISABLE msg.startswith(self.nickname + ":"):
+            #msg = "%s: I am a log bot" % user
+            #self.msg(channel, msg)
+            self.handle_message(user, msg)
 
     def action(self, user, channel, msg):
         """This will get called when the bot sees someone do an action."""
         user = user.split('!', 1)[0]
         self.logger.log("* %s %s" % (user, msg))
+        self.handle_action(user, msg)
 
     # irc callbacks
 
