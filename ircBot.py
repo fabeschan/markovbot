@@ -1,7 +1,10 @@
+#!/usr/bin/env python
+
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 from twisted.python import log
 import time, sys
+from daemon import Daemon
 
 class MessageLogger:
     """
@@ -25,6 +28,8 @@ class IrcBot(irc.IRCClient):
 
     def __init__(self, nickname="ircbot"):
         self.nickname = nickname
+        #self.logger.log("[IrcBot invoked at %s]" %
+        #                time.asctime(time.localtime(time.time())))
 
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
@@ -123,16 +128,29 @@ class IrcBotFactory(protocol.ClientFactory):
         print "connection failed:", reason
         reactor.stop()
 
+def runBot():
+    log.startLogging(sys.stdout) # initialize logging
+    f = IrcBotFactory('ircbot', 'bottest', '/tmp/test.log') # create factory protocol and application
+    reactor.connectTCP("irc.snoonet.org", 6667, f) # connect factory to this host and port
+    reactor.run() # run bot
 
-if __name__ == '__main__':
-    # initialize logging
-    log.startLogging(sys.stdout)
+class IrcDaemon(Daemon):
+    def run(self): runBot()
 
-    # create factory protocol and application
-    f = IrcBotFactory('ircbot', 'bottest', 'test.log')
+if __name__ == "__main__":
+    daemon = IrcDaemon('/tmp/{}.pid'.format(sys.argv[0]))
 
-    # connect factory to this host and port
-    reactor.connectTCP("irc.snoonet.org", 6667, f)
-
-    # run bot
-    reactor.run()
+    if len(sys.argv) == 2:
+        if 'start' == sys.argv[1]:
+            daemon.start()
+        elif 'stop' == sys.argv[1]:
+            daemon.stop()
+        elif 'restart' == sys.argv[1]:
+            daemon.restart()
+        else:
+            print "Unknown command"
+            sys.exit(2)
+        sys.exit(0)
+    else:
+        print "usage: %s start|stop|restart" % sys.argv[0]
+        sys.exit(2)
