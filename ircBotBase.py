@@ -43,6 +43,9 @@ class IrcBotBase(irc.IRCClient):
                         time.asctime(time.localtime(time.time())))
         self.logger.close()
 
+    def msg_delay(self, delay, channel, msg):
+        reactor.callLater(delay, self.msg, channel, msg)
+
     # override these functions to handle different events
     def handle_whisper(self, user, msg):
         msg = "It isn't nice to whisper!  Play nice with the group."
@@ -52,6 +55,7 @@ class IrcBotBase(irc.IRCClient):
         if msg.startswith(self.nickname + ":"):
             msg = "%s: I am a log bot" % user
             self.msg(channel, msg)
+            self.msg_delay(3.5, channel, "{}: How are you?".format(user))
 
     def handle_action(self, user, msg):
         pass
