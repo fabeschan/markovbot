@@ -1,10 +1,10 @@
 all: restart
 
 restart:
-	./ircBotBase.py restart
+	./markovBot.py restart
 
 start:
-	./ircBotBase.py start
+	./markovBot.py start
 
 stop:
-	./ircBotBase.py stop
+	./markovBot.py stop
