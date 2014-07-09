@@ -45,10 +45,13 @@ class IrcBotBase(irc.IRCClient):
 
     # override these functions to handle different events
     def handle_whisper(self, user, msg):
-        pass
+        msg = "It isn't nice to whisper!  Play nice with the group."
+        self.msg(user, msg)
 
-    def handle_message(self, user, msg):
-        pass
+    def handle_message(self, user, channel, msg):
+        if msg.startswith(self.nickname + ":"):
+            msg = "%s: I am a log bot" % user
+            self.msg(channel, msg)
 
     def handle_action(self, user, msg):
         pass
@@ -70,15 +73,11 @@ class IrcBotBase(irc.IRCClient):
 
         # Check to see if they're sending me a private message
         if channel == self.nickname:
-            #msg = "It isn't nice to whisper!  Play nice with the group."
-            #self.msg(user, msg)
             self.handle_whisper(user, msg)
 
         # Otherwise it is a message
-        else:  # DISABLE msg.startswith(self.nickname + ":"):
-            #msg = "%s: I am a log bot" % user
-            #self.msg(channel, msg)
-            self.handle_message(user, msg)
+        else:
+            self.handle_message(user, channel, msg)
 
     def action(self, user, channel, msg):
         """This will get called when the bot sees someone do an action."""
