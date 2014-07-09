@@ -1,10 +1,10 @@
 all: restart
 
 restart:
-	./ircBot.py restart
+	./ircBotBase.py restart
 
 start:
-	./ircBot.py start
+	./ircBotBase.py start
 
 stop:
-	./ircBot.py stop
+	./ircBotBase.py stop
