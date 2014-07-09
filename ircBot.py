@@ -110,13 +110,14 @@ class IrcBotFactory(protocol.ClientFactory):
     A new protocol instance will be created each time we connect to the server.
     """
 
-    def __init__(self, nickname, channel, filename):
+    def __init__(self, nickname, channel, filename, ircBot=IrcBot):
         self.nickname = nickname
         self.channel = channel
         self.filename = filename
+        self.ircBot = ircBot
 
     def buildProtocol(self, addr):
-        p = IrcBot(self.nickname)
+        p = self.ircBot(self.nickname)
         p.factory = self
         return p
 
@@ -128,14 +129,15 @@ class IrcBotFactory(protocol.ClientFactory):
         print "connection failed:", reason
         reactor.stop()
 
-def runBot():
-    log.startLogging(sys.stdout) # initialize logging
-    f = IrcBotFactory('ircbot', 'bottest', '/tmp/test.log') # create factory protocol and application
-    reactor.connectTCP("irc.snoonet.org", 6667, f) # connect factory to this host and port
-    reactor.run() # run bot
-
 class IrcDaemon(Daemon):
-    def run(self): runBot()
+    def __init__(self, *args, **kwargs):
+        super(self.__class__, self).__init__(*args, **kwargs)
+        log.startLogging(sys.stdout) # initialize logging
+        self.f = IrcBotFactory('ircbot', 'bottest', '/tmp/test.log') # create factory protocol and application
+
+    def run(self):
+        reactor.connectTCP("irc.snoonet.org", 6667, self.f) # connect factory to this host and port
+        reactor.run() # run bot
 
 if __name__ == "__main__":
     daemon = IrcDaemon('/tmp/{}.pid'.format(sys.argv[0]))

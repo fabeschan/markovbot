@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
-import sys, os, time, atexit
-from signal import SIGTERM
+import sys, os, time, atexit, signal
 
-class Daemon:
+class Daemon(object):
     """
     A generic daemon class.
 
@@ -62,8 +61,12 @@ class Daemon:
 
         # write pidfile
         atexit.register(self.delpid)
+        def cleanup_handler(signum, frame):
+            os.remove(pidfile)
+        signal.signal(signal.SIGTERM, cleanup_handler)
         pid = str(os.getpid())
         file(self.pidfile,'w+').write("%s\n" % pid)
+
 
     def delpid(self):
         os.remove(self.pidfile)
@@ -109,7 +112,7 @@ class Daemon:
         # Try killing the daemon process
         try:
             while 1:
-                os.kill(pid, SIGTERM)
+                os.kill(pid, signal.SIGTERM)
                 time.sleep(0.1)
         except OSError, err:
             err = str(err)
