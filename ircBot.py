@@ -23,7 +23,7 @@ class MessageLogger:
     def close(self):
         self.file.close()
 
-class IrcBot(irc.IRCClient):
+class IrcBotBase(irc.IRCClient):
     """IRC bot. Base form"""
 
     def __init__(self, nickname="ircbot"):
@@ -110,7 +110,7 @@ class IrcBotFactory(protocol.ClientFactory):
     A new protocol instance will be created each time we connect to the server.
     """
 
-    def __init__(self, nickname, channel, filename, ircBot=IrcBot):
+    def __init__(self, nickname, channel, filename, ircBot=IrcBotBase):
         self.nickname = nickname
         self.channel = channel
         self.filename = filename
