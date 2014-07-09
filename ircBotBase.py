@@ -16,7 +16,7 @@ class MessageLogger:
 
     def log(self, message):
         """Write a message to the file."""
-        timestamp = time.strftime("[%H:%M:%S]", time.localtime(time.time()))
+        timestamp = "[%s]" % time.asctime(time.localtime(time.time()))
         self.file.write('%s %s\n' % (timestamp, message))
         self.file.flush()
 
@@ -28,19 +28,15 @@ class IrcBotBase(irc.IRCClient):
 
     def __init__(self, nickname="ircbot"):
         self.nickname = nickname
-        #self.logger.log("[IrcBot invoked at %s]" %
-        #                time.asctime(time.localtime(time.time())))
 
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
         self.logger = MessageLogger(open(self.factory.filename, "a"))
-        self.logger.log("[connected at %s]" %
-                        time.asctime(time.localtime(time.time())))
+        self.logger.log("Connected")
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
-        self.logger.log("[disconnected at %s]" %
-                        time.asctime(time.localtime(time.time())))
+        self.logger.log("Disconnected")
         self.logger.close()
 
     def msg_delay(self, delay, channel, msg):
@@ -68,7 +64,7 @@ class IrcBotBase(irc.IRCClient):
 
     def joined(self, channel):
         """This will get called when the bot joins the channel."""
-        self.logger.log("[I have joined %s]" % channel)
+        self.logger.log("Joined channel [%s]" % channel)
 
     def privmsg(self, user, channel, msg):
         """This will get called when the bot receives a message."""
