@@ -132,10 +132,14 @@ class IrcDaemon(Daemon):
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
         log.startLogging(sys.stdout) # initialize logging
-        self.f = IrcBotFactory('ircbot', 'bottest', '/tmp/test.log') # create factory protocol and application
+        self.nickname = 'ircbot'
+        self.channel = 'bottest'
+        self.server = 'irc.snoonet.org'
+        self.port = 6667
 
     def run(self):
-        reactor.connectTCP("irc.snoonet.org", 6667, self.f) # connect factory to this host and port
+        self.f = IrcBotFactory(self.nickname, self.channel, '/tmp/test.log') # create factory protocol and application
+        reactor.connectTCP(self.server, self.port, self.f) # connect factory to this host and port
         reactor.run() # run bot
 
     def main(self):
@@ -157,5 +161,9 @@ class IrcDaemon(Daemon):
 
 if __name__ == "__main__":
     daemon = IrcDaemon('/tmp/{}.pid'.format(sys.argv[0]))
+    daemon.nickname = 'ircbot'
+    daemon.channel = 'bottest'
+    daemon.server = 'irc.snoonet.org'
+    daemon.port = 6667
     daemon.main() # run it
 
